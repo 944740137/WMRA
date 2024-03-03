@@ -137,17 +137,17 @@ target_link_libraries(wheelChair
   ${catkin_LIBRARIES}
 )
 
-add_executable(move_to_start 
+add_executable(armMove2start 
   src/manipulator/move_to_start.cpp 
 )
-target_link_libraries(move_to_start 
+target_link_libraries(armMove2start 
   libZ1_SDK_x86_64.so 
 )
 
-add_executable(main 
+add_executable(armTest 
   src/manipulator/main.cpp 
 )
-target_link_libraries(main 
+target_link_libraries(armTest 
   libZ1_SDK_x86_64.so 
 )
 

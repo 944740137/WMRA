@@ -1,3 +1,0 @@
-<launch>
-     <node pkg="WMRA" type="move_to_start" name="move_to_start" output="screen" />
-</launch>
