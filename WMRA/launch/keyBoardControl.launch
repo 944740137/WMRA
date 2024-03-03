@@ -1,0 +1,3 @@
+<launch>
+     <node pkg="WMRA" type="keyBoardControl" name="keyBoardControl" output="screen" />
+</launch>
