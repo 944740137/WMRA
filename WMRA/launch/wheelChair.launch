@@ -1,0 +1,3 @@
+<launch>
+     <node pkg="WMRA" type="wheelChair" name="wheelChair" output="screen" />
+</launch>
