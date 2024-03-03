@@ -1,0 +1,3 @@
+<launch>
+     <node pkg="WMRA" type="armMove2start" name="armMove2start" output="screen" />
+</launch>

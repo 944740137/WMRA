@@ -1,3 +1,0 @@
-<launch>
-     <node pkg="WMRA" type="main" name="main" output="screen" />
-</launch>
