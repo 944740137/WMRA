@@ -4,7 +4,7 @@
 //#include "pch.h"
 #include <iostream>
 //#include "motor.h"
-#include "kvaser.h"
+#include "kvaser/kvaser.h"
 #include <unistd.h>
 //#define  //TRACE  printf
 

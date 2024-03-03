@@ -18,7 +18,7 @@
 #include "geometry_msgs/Vector3.h"
 #include "geometry_msgs/PoseWithCovarianceStamped.h"
 
-#include "kvaser.h"
+#include "kvaser/kvaser.h"
 
 #include "Eigen/Core"
 #include "Eigen/Dense"

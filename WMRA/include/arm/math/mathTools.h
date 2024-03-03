@@ -3,7 +3,7 @@
 
 #include <iostream>
 #include <math.h>
-#include "manipulator/math/mathTypes.h"
+#include "arm/math/mathTypes.h"
 
 namespace UNITREE_ARM {
 

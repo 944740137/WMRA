@@ -1,4 +1,4 @@
-#include "manipulator/control/unitreeArm.h"
+#include "arm/control/unitreeArm.h"
 
 int main()
 {

@@ -6,7 +6,7 @@
  */
 
 #include <vector>
-#include "manipulator/math/mathTools.h"
+#include "arm/math/mathTools.h"
 
 namespace robo {
 /*
@@ -186,7 +186,7 @@ Mat6 CoordinateTransForceVector(const HomoMat& T);
 /*
  * Function: Compute end effector frame (used for current spatial position calculation)
  * Inputs: Home configuration (position and orientation) of end-effector
- *		   The joint screw axes in the space frame when the manipulator
+ *		   The joint screw axes in the space frame when the arm
  *             is at the home position
  * 		   A list of joint coordinates.
  * Returns: Transfomation matrix representing the end-effector frame when the joints are
@@ -198,7 +198,7 @@ Eigen::MatrixXd FKinSpace(const Eigen::MatrixXd&, const Eigen::MatrixXd&, const 
 /*
  * Function: Compute end effector frame (used for current body position calculation)
  * Inputs: Home configuration (position and orientation) of end-effector
- *		   The joint screw axes in the body frame when the manipulator
+ *		   The joint screw axes in the body frame when the arm
  *             is at the home position
  * 		   A list of joint coordinates.
  * Returns: Transfomation matrix representing the end-effector frame when the joints are
@@ -340,7 +340,7 @@ bool TestIfSE3(const Eigen::Matrix4d&);
  * Function: Computes inverse kinematics in the body frame for an open chain robot
  * Inputs:
  *	Blist: The joint screw axes in the end-effector frame when the
- *         manipulator is at the home position, in the format of a
+ *         arm is at the home position, in the format of a
  *         matrix with axes as the columns
  *	M: The home configuration of the end-effector
  *	T: The desired end-effector configuration Tsd
@@ -366,7 +366,7 @@ bool IKinBody(const Eigen::MatrixXd&, const Eigen::MatrixXd&, const Eigen::Matri
  * Function: Computes inverse kinematics in the space frame for an open chain robot
  * Inputs:
  *	Slist: The joint screw axes in the space frame when the
- *         manipulator is at the home position, in the format of a
+ *         arm is at the home position, in the format of a
  *         matrix with axes as the columns
  *	M: The home configuration of the end-effector
  *	T: The desired end-effector configuration Tsd

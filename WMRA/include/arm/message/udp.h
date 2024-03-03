@@ -6,7 +6,7 @@
 #include <string>
 #include <string.h>
 #include <vector>
-#include "manipulator/utilities/loop.h"
+#include "arm/utilities/loop.h"
 #include <chrono>
 
 namespace UNITREE_ARM {

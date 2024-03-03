@@ -124,10 +124,10 @@ include_directories(
   "/home/badboy/teamwork/src/Mobile_Platform/include/"
   ${EIGEN_PATH}
 )
-link_directories(lib)
+link_directories(lib/arm)
 
 add_executable(wheelChair 
-  src/kvaser.cpp
+  src/kvaser/kvaser.cpp
   src/wheelChair/wheelChairControl.cpp 
   src/wheelChair/wheelChair.cpp 
 )
@@ -138,14 +138,14 @@ target_link_libraries(wheelChair
 )
 
 add_executable(move_to_start 
-  src/manipulator/move_to_start.cpp 
+  src/arm/move_to_start.cpp 
 )
 target_link_libraries(move_to_start 
   libZ1_SDK_x86_64.so 
 )
 
 add_executable(main 
-  src/manipulator/main.cpp 
+  src/arm/main.cpp 
 )
 target_link_libraries(main 
   libZ1_SDK_x86_64.so 

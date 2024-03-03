@@ -1,12 +1,12 @@
 #ifndef CTRLCOMPONENTS_H
 #define CTRLCOMPONENTS_H
 
-#include "manipulator/message/arm_common.h"
-#include "manipulator/message/LowlevelCmd.h"
-#include "manipulator/message/LowlevelState.h"
-#include "manipulator/message/udp.h"
-#include "manipulator/utilities/loop.h"
-#include "manipulator/model/ArmModel.h"
+#include "arm/message/arm_common.h"
+#include "arm/message/LowlevelCmd.h"
+#include "arm/message/LowlevelState.h"
+#include "arm/message/udp.h"
+#include "arm/utilities/loop.h"
+#include "arm/model/ArmModel.h"
 
 namespace UNITREE_ARM {
 struct CtrlComponents{

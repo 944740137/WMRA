@@ -1,7 +1,7 @@
 #ifndef LOWLEVELCMD_H
 #define LOWLEVELCMD_H
 
-#include "manipulator/math/mathTypes.h"
+#include "arm/math/mathTypes.h"
 #include <vector>
 #include <iostream>
 

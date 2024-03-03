@@ -1,7 +1,7 @@
 #ifndef __UNITREEARM_H
 #define __UNITREEARM_H
 
-#include "manipulator/control/ctrlComponents.h"
+#include "arm/control/ctrlComponents.h"
 
 namespace UNITREE_ARM {
 
