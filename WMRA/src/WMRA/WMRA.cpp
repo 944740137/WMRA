@@ -6,9 +6,10 @@
 int main(int argc, char *argv[])
 {
     ros::init(argc, argv, "WMRA");
+    ros::NodeHandle n;
     WheelChair wheelChair;
     Manipulator manipulator(false);
-    ros::Rate r(1000 / cycle);
+    // ros::Rate r(1000 / cycle);
 
     // d
     double Vd = 0;
@@ -17,6 +18,7 @@ int main(int argc, char *argv[])
     Eigen::Matrix<double, 6, 1> q_d = manipulator.getq();
     Eigen::Matrix<double, 6, 1> dq_d = manipulator.getq();
     Eigen::Matrix<double, 6, 1> tau_feedforward = Eigen::MatrixXd::Zero(6, 1);
+    Eigen::Matrix<double, 6, 1> tmp = Eigen::MatrixXd::Zero(6, 1);
 
     double posPara = 0.4;
     double velPara = 1.5;
@@ -24,9 +26,9 @@ int main(int argc, char *argv[])
 
     while (ros::ok())
     {
-        double time = time + cycle / 1000; // 单位：秒
+        double time = time + cycle / 1000.0; // 单位：秒
 
-        q_d = manipulator.getq();
+        tmp = manipulator.getq();
 
         q_d[0] = q0[0] + posPara * (1 - cos(velPara * time));
         q_d[1] = q0[1] + posPara * (1 - cos(velPara * time));
@@ -38,9 +40,9 @@ int main(int argc, char *argv[])
         //
         wheelChair.run(Vd, Wd);
         manipulator.run(q_d, dq_d, tau_feedforward);
+
         ros::spinOnce();
-        time = time + 1;
-        r.sleep();
+        usleep(cycle);
     }
 
     return 0;

@@ -6,7 +6,7 @@
 
 #include "kvaser/kvaser.h"
 
-const int cycle = 2; // ms
+const double cycle = 2; // ms
 
 class WheelChair
 {
@@ -28,7 +28,7 @@ public:
 
 private:
     Kvaser *kvaserInterface;
-
+    bool moveFlag = false;
     // model
     const double twoWheelDis = 0.585;
     const double wheelRadius = 0.1575;

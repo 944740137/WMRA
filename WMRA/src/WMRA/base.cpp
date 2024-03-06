@@ -2,7 +2,7 @@
 
 #include "fstream"
 #include "math.h"
-#include <unistd.h>  
+#include <unistd.h>
 
 WheelChair::WheelChair()
 {
@@ -54,38 +54,51 @@ WheelChair::~WheelChair()
 void WheelChair::setCommand(double Vd, double Wd)
 {
     if (Vd == this->Vd && Wd == this->Wd)
+    {
+        if (Vd != 0 || Wd != 0)
+            this->moveFlag = true;
         return;
+    }
+
+    this->moveFlag = true;
 
     this->Vd = Vd;
     this->Wd = Wd;
 
     this->leftWheelVd = (2 * this->Vd - this->twoWheelDis * this->Wd) / 2 * 32 * 4096 / (2 * PI) / this->wheelRadius;
-    if (this->leftWheelVd > 0.3 * 32 * 4096 / 2 / PI / wheelRadius)    
+    if (this->leftWheelVd > 0.3 * 32 * 4096 / 2 / PI / wheelRadius)
         this->leftWheelVd = 0.3 * 32 * 4096 / 2 / PI / wheelRadius;
-    
-    if (this->leftWheelVd < -0.3 * 32 * 4096 / 2 / PI / wheelRadius)    
+
+    if (this->leftWheelVd < -0.3 * 32 * 4096 / 2 / PI / wheelRadius)
         this->leftWheelVd = -0.3 * 32 * 4096 / 2 / PI / wheelRadius;
-    
+
     this->rightWheelVd = (2 * this->Vd + this->twoWheelDis * this->Wd) / 2 * 32 * 4096 / (2 * PI) / this->wheelRadius;
-    if (this->rightWheelVd > 0.3 * 32 * 4096 / 2 / PI / wheelRadius)   
+    if (this->rightWheelVd > 0.3 * 32 * 4096 / 2 / PI / wheelRadius)
         this->rightWheelVd = 0.3 * 32 * 4096 / 2 / PI / wheelRadius;
-    
+
     if (this->rightWheelVd < -0.3 * 32 * 4096 / 2 / PI / wheelRadius)
         this->rightWheelVd = -0.3 * 32 * 4096 / 2 / PI / wheelRadius;
 
     // ROS_INFO_STREAM(this->leftWheelVd);
     // ROS_INFO_STREAM(this->rightWheelVd);
-
+    std::cout << "speed 1111" << std::endl;
     // 发送
     this->kvaserInterface->speedMode(1, this->leftWheelVd);
     this->kvaserInterface->speedMode(2, this->rightWheelVd);
 
+    std::cout << "speed 2222 " << std::endl;
+
     this->kvaserInterface->beginMovement(1);
     this->kvaserInterface->beginMovement(2);
+
+    std::cout << "speed 3333 " << std::endl;
 }
 
 void WheelChair::updateData()
 {
+    if (!this->moveFlag)
+        return;
+
     // 读取轮子线速度
     this->rightWheelV = this->kvaserInterface->getVelocity(1, 1024, 32) * this->wheelRadius;
     this->leftWheelV = this->kvaserInterface->getVelocity(1, 1024, 32) * this->wheelRadius;
@@ -96,17 +109,19 @@ void WheelChair::updateData()
 
     // 状态
     this->theta = this->theta + this->W * cycle;
-    if (this->theta < -PI)    
+    if (this->theta < -PI)
         this->theta += 2 * PI;
     if (this->theta >= PI)
         this->theta -= 2 * PI;
-    
+
     this->x += cycle * this->V * cos(this->theta);
     this->y += cycle * this->V * sin(this->theta);
+
+    this->moveFlag = false; // 运动了则更新标志位记录新里程数据
 }
 
 void WheelChair::run(double Vd, double Wd)
 {
-    this->updateData();
     this->setCommand(Vd, Wd);
+    this->updateData();
 }

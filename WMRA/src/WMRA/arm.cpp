@@ -3,8 +3,10 @@
 Manipulator::Manipulator(bool hasGripper)
 {
     arm = new unitreeArm(hasGripper);
+    arm->sendRecvThread->start();
     arm->setFsm(ArmFSMState::PASSIVE);
     arm->setFsm(ArmFSMState::LOWCMD);
+    arm->sendRecvThread->shutdown();
 
     // default
     std::vector<double> Kp = arm->_ctrlComp->lowcmd->kp;

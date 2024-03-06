@@ -1,0 +1,3 @@
+<launch>
+     <node pkg="WMRA" type="WMRA" name="WMRA" output="screen" />
+</launch>
