@@ -11,13 +11,13 @@ Manipulator::Manipulator(bool hasGripper)
     // default
     std::vector<double> Kp = arm->_ctrlComp->lowcmd->kp;
     std::vector<double> Kv = arm->_ctrlComp->lowcmd->kd;
-    std::cout << "default Kp: ";
+    std::cout << "[------] default Kp: ";
     for (const auto &element : Kp)
     {
         std::cout << element << " ";
     }
     std::cout << std::endl;
-    std::cout << "default Kv: ";
+    std::cout << "[------] default Kv: ";
     for (const auto &element : Kv)
     {
         std::cout << element << " ";
@@ -25,7 +25,7 @@ Manipulator::Manipulator(bool hasGripper)
     std::cout << std::endl;
 
     arm->_ctrlComp->lowcmd->setControlGain(Kp, Kv);
-    ROS_INFO("Manipulator init success");
+    std::cout << "[------] Manipulator init success" << std::endl;
 }
 Manipulator::~Manipulator()
 {
@@ -51,7 +51,7 @@ void Manipulator::setControlGain(std::vector<double> Kp, std::vector<double> Kv)
 {
     if (Kp.size() != 6 || Kv.size() != 6)
     {
-        std::cout << "setControlGain error" << std::endl;
+        std::cout << "[------] setControlGain error" << std::endl;
         return;
     }
     arm->_ctrlComp->lowcmd->setControlGain(Kp, Kv);
@@ -60,6 +60,3 @@ Eigen::Matrix<double, 6, 1> Manipulator::getq()
 {
     return arm->lowstate->getQ();
 }
-// Eigen::Matrix<double, 6, 1> Manipulator::getdq()
-// {
-// }

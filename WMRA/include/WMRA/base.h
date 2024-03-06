@@ -28,7 +28,7 @@ public:
 
 private:
     Kvaser *kvaserInterface;
-    bool moveFlag = false;
+    bool updateFlag = false;
     // model
     const double twoWheelDis = 0.585;
     const double wheelRadius = 0.1575;

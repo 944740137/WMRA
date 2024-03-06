@@ -24,7 +24,7 @@ WheelChair::WheelChair()
     this->kvaserInterface->modeChoose(2, this->kvaserInterface->SPEED_MODE);
 
     sleep(1);
-    ROS_INFO("WheelChair init success");
+    std::cout << "[------] WheelChair init success" << std::endl;
 }
 
 WheelChair::~WheelChair()
@@ -48,7 +48,6 @@ WheelChair::~WheelChair()
     //     data << mTimeStamp.at(i) << " " << x << " " << y << " " << z << " " << qx << " " << qy << " " << qz << " " << qw << std::endl;
     // }
     data.close();
-    ROS_INFO("end");
 }
 
 void WheelChair::setCommand(double Vd, double Wd)
@@ -56,11 +55,11 @@ void WheelChair::setCommand(double Vd, double Wd)
     if (Vd == this->Vd && Wd == this->Wd)
     {
         if (Vd != 0 || Wd != 0)
-            this->moveFlag = true;
+            this->updateFlag = true;
         return;
     }
 
-    this->moveFlag = true;
+    this->updateFlag = true;
 
     this->Vd = Vd;
     this->Wd = Wd;
@@ -79,24 +78,18 @@ void WheelChair::setCommand(double Vd, double Wd)
     if (this->rightWheelVd < -0.3 * 32 * 4096 / 2 / PI / wheelRadius)
         this->rightWheelVd = -0.3 * 32 * 4096 / 2 / PI / wheelRadius;
 
-    // ROS_INFO_STREAM(this->leftWheelVd);
-    // ROS_INFO_STREAM(this->rightWheelVd);
-    std::cout << "speed 1111" << std::endl;
     // 发送
     this->kvaserInterface->speedMode(1, this->leftWheelVd);
     this->kvaserInterface->speedMode(2, this->rightWheelVd);
 
-    std::cout << "speed 2222 " << std::endl;
-
     this->kvaserInterface->beginMovement(1);
     this->kvaserInterface->beginMovement(2);
 
-    std::cout << "speed 3333 " << std::endl;
 }
 
 void WheelChair::updateData()
 {
-    if (!this->moveFlag)
+    if (!this->updateFlag)
         return;
 
     // 读取轮子线速度
@@ -117,7 +110,7 @@ void WheelChair::updateData()
     this->x += cycle * this->V * cos(this->theta);
     this->y += cycle * this->V * sin(this->theta);
 
-    this->moveFlag = false; // 运动了则更新标志位记录新里程数据
+    this->updateFlag = false; // 运动了则更新标志位记录新里程数据
 }
 
 void WheelChair::run(double Vd, double Wd)
