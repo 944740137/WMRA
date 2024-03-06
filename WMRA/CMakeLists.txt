@@ -125,7 +125,7 @@ include_directories(
   ${EIGEN_PATH}
 )
 link_directories(lib/arm)
-
+#  轮椅
 add_executable(wheelChair 
   src/kvaser/kvaser.cpp
   src/wheelChair/wheelChairControl.cpp 
@@ -136,14 +136,27 @@ target_link_libraries(wheelChair
   libcanlib.so.1 
   ${catkin_LIBRARIES}
 )
+#  WMRA
+add_executable(WMRA 
+  src/kvaser/kvaser.cpp
+  src/WMRA/WMRA.cpp 
+  src/WMRA/base.cpp 
+  src/WMRA/arm.cpp 
+)
+target_link_libraries(WMRA 
+  libcanlib.so 
+  libcanlib.so.1 
+  ${catkin_LIBRARIES}
 
+  libZ1_SDK_x86_64.so 
+)
+# arm
 add_executable(armMove2start 
   src/arm/move_to_start.cpp 
 )
 target_link_libraries(armMove2start 
   libZ1_SDK_x86_64.so 
 )
-
 add_executable(armTest 
   src/arm/main.cpp 
 )

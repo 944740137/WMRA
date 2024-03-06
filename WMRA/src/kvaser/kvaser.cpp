@@ -302,7 +302,7 @@ float Kvaser::getPosition(long can_id, uint16_t encoder_count, uint16_t reductio
     while (!((temp_Pos[0] == 0x50) && (temp_Pos[1] == 0x58) && (temp_Pos[3] != 0x40)));
     data_temp =
             (temp_Pos[7] & 0xff) << 24 | (temp_Pos[6] & 0xff) << 16 | (temp_Pos[5] & 0xff) << 8 | temp_Pos[4] & 0xff;
-    // 弧度值 = 2*PI*计数值 / 分辨率 / 减速比 / elmo放大倍数(4)
+    // 弧度值 = 2*PI*计数值（编码器格数/S） / 分辨率 / 减速比 / elmo放大倍数(4)
     return (float) (2.0 * PI * data_temp / 4.0 / encoder_count / reduction_ratio);
 }
 
