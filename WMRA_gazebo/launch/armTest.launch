@@ -1,0 +1,3 @@
+<launch>
+     <node pkg="WMRA" type="armTest" name="armTest" output="screen" />
+</launch>

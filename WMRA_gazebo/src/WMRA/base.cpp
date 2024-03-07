@@ -6,6 +6,7 @@
 
 WheelChair::WheelChair()
 {
+    sleep(1);
     this->kvaserInterface = new Kvaser();
     this->kvaserInterface->canInit(0);
 
@@ -83,6 +84,7 @@ void WheelChair::setCommand(double Vd, double Wd)
 
     this->kvaserInterface->beginMovement(1);
     this->kvaserInterface->beginMovement(2);
+
 }
 
 void WheelChair::updateData()
@@ -110,12 +112,9 @@ void WheelChair::updateData()
 
     this->updateFlag = false; // 运动了则更新标志位记录新里程数据
 }
-void WheelChair::pubData()
-{
-}
+
 void WheelChair::run(double Vd, double Wd)
 {
     this->setCommand(Vd, Wd);
     this->updateData();
-    this->pubData();
 }

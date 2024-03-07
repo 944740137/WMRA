@@ -17,7 +17,6 @@ public:
     void run(double Vd, double Wd);
     void setCommand(double Vd, double Wd);
     void updateData();
-    void pubData();
 
     double getV() { return V; }
     double getW() { return W; }
@@ -28,10 +27,8 @@ public:
     double getLeftWheelV() { return leftWheelV; }
 
 private:
-
     Kvaser *kvaserInterface;
     bool updateFlag = false;
-
     // model
     const double twoWheelDis = 0.585;
     const double wheelRadius = 0.1575;
