@@ -25,13 +25,13 @@ int main(int argc, char *argv[])
     //
     double Vd = 0;
     double Wd = 0;
+    double vxd = 0;
+    double vyd = 0;
     double V = 0;
     double W = 0;
     double x = 0;
     double y = 0;
     double theta = 0;
-
-    //
 
     // Eigen::Matrix<double, 6, 1> q0 = manipulator.getq();
     Eigen::Matrix<double, 6, 1> q_d = Eigen::MatrixXd::Zero(6, 1);
@@ -39,6 +39,7 @@ int main(int argc, char *argv[])
     Eigen::Matrix<double, 6, 1> dq_d = Eigen::MatrixXd::Zero(6, 1);
     Eigen::Matrix<double, 6, 1> tau_feedforward = Eigen::MatrixXd::Zero(6, 1);
 
+    // 轨迹
     double posPara = 0.4;
     double velPara = 1.5;
 
@@ -60,12 +61,12 @@ int main(int argc, char *argv[])
         theta = wheelChair.getTheta();
 
         // 轨迹
-        // q_d[0] = q0[0] + posPara * (1 - cos(velPara * time));
-        // q_d[1] = q0[1] + posPara * (1 - cos(velPara * time));
-        // q_d[2] = q0[2] - posPara * (1 - cos(velPara * time));
-        // q_d[3] = q0[3] - posPara * (1 - cos(velPara * time));
-        // q_d[4] = q0[4] - posPara * (1 - cos(velPara * time));
-        // q_d[5] = q0[5] - posPara * (1 - cos(velPara * time));
+        // xd = -1 + cos(PI / 2 * time);
+        // yd = sin(PI / 2 * time);
+        vxd = PI / 2 * sin(PI / 2 * time);
+        vyd = PI / 2 * cos(PI / 2 * time);
+        Vd = sqrt(vxd * vxd + vyd * vyd);
+        Wd = atan2(vyd, vxd);
 
         // run
         wheelChair.run(Vd, Wd);
