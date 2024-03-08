@@ -9,7 +9,7 @@
 //#include "delay.h"
 
 #include <string>
-#define PI 3.1415
+#define PI 3.141592654
 
 class Kvaser final
 {

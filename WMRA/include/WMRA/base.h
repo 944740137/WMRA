@@ -17,7 +17,6 @@ public:
     void run(double Vd, double Wd);
     void setCommand(double Vd, double Wd);
     void updateData();
-    void pubData();
 
     double getV() { return V; }
     double getW() { return W; }

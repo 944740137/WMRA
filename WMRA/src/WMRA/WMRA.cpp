@@ -5,10 +5,11 @@
 
 #include <tf/transform_broadcaster.h>
 #include <nav_msgs/Odometry.h>
+#include <nav_msgs/Path.h>
 
 #include "math.h"
 
-void pub(const ros::Publisher &odomPublisher, tf::TransformBroadcaster &odomBroadcaster,
+void pub(const ros::Publisher &odomPublisher, ros::Publisher &pathPublisher, tf::TransformBroadcaster &odomBroadcaster,
          double &v, double &w, double &x, double &y, double &theta);
 
 int main(int argc, char *argv[])
@@ -20,6 +21,7 @@ int main(int argc, char *argv[])
     // Manipulator manipulator(false); // 阻塞等待机械臂连接成功
 
     ros::Publisher odomPublisher = n.advertise<nav_msgs::Odometry>("/WMRA/odom", 10);
+    ros::Publisher pathPublisher = n.advertise<nav_msgs::Path>("trajectory", 1, true);
     tf::TransformBroadcaster odomBroadcaster;
 
     //
@@ -50,8 +52,7 @@ int main(int argc, char *argv[])
     while (ros::ok())
     {
         // update +=2ms
-        double time = time + cycle / 1000.0; // 单位：秒
-
+        time = time + cycle / 1000.0; // 单位：秒
         // get
         // q = manipulator.getq();
         V = wheelChair.getV();
@@ -63,17 +64,24 @@ int main(int argc, char *argv[])
         // 轨迹
         // xd = -1 + cos(PI / 2 * time);
         // yd = sin(PI / 2 * time);
-        vxd = PI / 2 * sin(PI / 2 * time);
-        vyd = PI / 2 * cos(PI / 2 * time);
+        vxd = -PI / 4 * sin(PI / 4 * time);
+        vyd = PI / 4 * cos(PI / 4 * time);
         Vd = sqrt(vxd * vxd + vyd * vyd);
         Wd = atan2(vyd, vxd);
+        Vd = 0.05;
+        Wd = 0;
+        // if (time >= 2)
+        // {
+        // Vd = 0.00;
+        // }
+        std::cout << "x:" << x << "  y:" << y << std::endl;
 
         // run
         wheelChair.run(Vd, Wd);
         // manipulator.run(q_d, dq_d, tau_feedforward);
 
         // pub
-        pub(odomPublisher, odomBroadcaster, V, W, x, y, theta);
+        pub(odomPublisher, pathPublisher, odomBroadcaster, V, W, x, y, theta);
         //
         ros::spinOnce();
         r.sleep();
@@ -82,7 +90,7 @@ int main(int argc, char *argv[])
     std::cout << "[------] End Program" << std::endl;
     return 0;
 }
-void pub(const ros::Publisher &odomPublisher, tf::TransformBroadcaster &odomBroadcaster,
+void pub(const ros::Publisher &odomPublisher, ros::Publisher &pathPublisher, tf::TransformBroadcaster &odomBroadcaster,
          double &v, double &w, double &x, double &y, double &theta)
 {
     ros::Time currentTime = ros::Time::now();
@@ -110,4 +118,20 @@ void pub(const ros::Publisher &odomPublisher, tf::TransformBroadcaster &odomBroa
     odom.twist.twist.linear.y = v * sin(theta);
     odom.twist.twist.angular.z = w;
     odomPublisher.publish(odom);
+    // path
+    nav_msgs::Path path;
+    geometry_msgs::PoseStamped this_pose_stamped;
+    this_pose_stamped.header.stamp = currentTime;
+    this_pose_stamped.pose.position.x = x;
+    this_pose_stamped.pose.position.y = y;
+    this_pose_stamped.pose.position.z = 0.0;
+    geometry_msgs::Quaternion goal_quat = tf::createQuaternionMsgFromYaw(theta);
+    this_pose_stamped.pose.orientation.x = goal_quat.x;
+    this_pose_stamped.pose.orientation.y = goal_quat.y;
+    this_pose_stamped.pose.orientation.z = goal_quat.z;
+    this_pose_stamped.pose.orientation.w = goal_quat.w;
+    this_pose_stamped.header.stamp = currentTime;
+    this_pose_stamped.header.frame_id = "odom";
+    path.poses.push_back(this_pose_stamped);
+    pathPublisher.publish(path);
 }

@@ -76,6 +76,7 @@ void WheelChair::setCommand(double Vd, double Wd)
 
     if (this->rightWheelVd < -0.3 * 32 * 4096 / 2 / PI / wheelRadius)
         this->rightWheelVd = -0.3 * 32 * 4096 / 2 / PI / wheelRadius;
+    std::cout << "leftWheelVd:" << this->leftWheelVd << "  rightWheelVd:" << this->rightWheelVd << std::endl;
 
     // 发送
     this->kvaserInterface->speedMode(1, this->leftWheelVd);
@@ -105,17 +106,14 @@ void WheelChair::updateData()
     if (this->theta >= PI)
         this->theta -= 2 * PI;
 
-    this->x += cycle * this->V * cos(this->theta);
-    this->y += cycle * this->V * sin(this->theta);
-
+    this->x += cycle / 1000.0 * this->V * cos(this->theta);
+    this->y += cycle / 1000.0 * this->V * sin(this->theta);
+    std::cout << " V: " << this->V << " W: " << this->W << " x" << this->x << " y: " << this->y << std::endl;
     this->updateFlag = false; // 运动了则更新标志位记录新里程数据
 }
-void WheelChair::pubData()
-{
-}
+
 void WheelChair::run(double Vd, double Wd)
 {
     this->setCommand(Vd, Wd);
     this->updateData();
-    this->pubData();
 }
