@@ -142,6 +142,7 @@ add_executable(WMRA
   src/WMRA/WMRA.cpp 
   src/WMRA/base.cpp 
   src/WMRA/arm.cpp 
+  src/WMRA/rosReferenceManager.cpp 
 )
 target_link_libraries(WMRA 
   libcanlib.so 

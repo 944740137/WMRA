@@ -1,9 +1,6 @@
 #ifndef _BASE_H_
 #define _BASE_H_
 
-#include <ros/ros.h>
-#include <ros/console.h>
-
 #include "kvaser/kvaser.h"
 
 const double cycle = 2; // ms
