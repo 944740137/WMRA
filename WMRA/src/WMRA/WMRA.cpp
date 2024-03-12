@@ -49,6 +49,16 @@ void velPlan1(double &time, double &xd, double &yd, double &vxd, double &vyd, do
     vyd = para * cos(para * time);
 }
 
+void velPlan1(double &time, double &xd, double &yd, double &vxd, double &vyd, double &theta_d)
+{
+    double para = 0.01;
+    xd = para * time;
+    yd = 0;
+    theta_d = 0;
+    vxd = para;
+    vyd = 0;
+}
+
 Manipulator *manipulator;
 WheelChair *wheelChair;
 RosReferenceManager *rosReferenceManage;
