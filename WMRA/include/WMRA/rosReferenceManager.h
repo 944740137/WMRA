@@ -11,7 +11,8 @@ public:
     RosReferenceManager(ros::NodeHandle &n);
     ~RosReferenceManager();
 
-    void run(double &v, double &w, double &x, double &y, double &theta);
+    void pubBaseData(double &v, double &w, double &x, double &y, double &theta,
+                     double &x_d, double &y_d, double &theta_d);
 
 private:
     // odom_trans
@@ -26,5 +27,8 @@ private:
     ros::Publisher pathPublisher;
     nav_msgs::Path path;
     geometry_msgs::PoseStamped poseStamped;
-    
+
+    ros::Publisher pathPublisher_d;
+    nav_msgs::Path path_d;
+    geometry_msgs::PoseStamped poseStamped_d;
 };

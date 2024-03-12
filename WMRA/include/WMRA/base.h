@@ -14,7 +14,7 @@ public:
     void run(double Vd, double Wd);
     void setCommand(double Vd, double Wd);
     void updateData();
-
+    void getData(double &v, double &w, double &x, double &y, double &theta);
     double getV() { return V; }
     double getW() { return W; }
     double getX() { return x; }
@@ -24,7 +24,6 @@ public:
     double getLeftWheelV() { return leftWheelV; }
 
 private:
-
     Kvaser *kvaserInterface;
     bool updateFlag = false;
 

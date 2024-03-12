@@ -1,12 +1,12 @@
 //
 // Created by lab306 on 2022/1/11.
 //
-//#include "pch.h"
+// #include "pch.h"
 #include <iostream>
-//#include "motor.h"
+// #include "motor.h"
 #include "kvaser/kvaser.h"
 #include <unistd.h>
-//#define  //TRACE  printf
+// #define  //TRACE  printf
 
 using namespace std;
 
@@ -38,7 +38,7 @@ int Kvaser::canInit(int channel_number)
         ////TRACE("can Bus On error! \n");
         return EXIT_FAILURE;
     }
-    //TRACE("can initialized! \n");
+    // TRACE("can initialized! \n");
     return EXIT_SUCCESS;
 }
 
@@ -57,7 +57,7 @@ int Kvaser::canRelease()
     {
         return EXIT_FAILURE;
     }
-    //TRACE("can released! \n");
+    // TRACE("can released! \n");
     return EXIT_SUCCESS;
 }
 
@@ -67,7 +67,7 @@ int Kvaser::canRelease()
 int Kvaser::canSend(uint8_t *msg, long can_id, unsigned int dlc)
 {
     status = canWrite(handle, can_id, msg, dlc, 0);
-    usleep(2000);
+    usleep(2000); // 2ms
     if (checkStatus("canWrite"))
     {
         return EXIT_FAILURE;
@@ -86,25 +86,25 @@ int Kvaser::canSend(uint8_t *msg, long can_id, unsigned int dlc)
  */
 int Kvaser::connectMotor(long can_id)
 {
-    uint8_t data1[8] = {0x82, (uint8_t) can_id, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
-    uint8_t data2[8] = {0x01, (uint8_t) can_id, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}; // ID=1
+    uint8_t data1[8] = {0x82, (uint8_t)can_id, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
+    uint8_t data2[8] = {0x01, (uint8_t)can_id, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}; // ID=1
     int flag = canSend(data1, can_id, 8);
     if (flag == EXIT_FAILURE)
     {
-        //TRACE("Motor %d connect failed! \n",can_id);
+        // TRACE("Motor %d connect failed! \n",can_id);
         return EXIT_FAILURE;
     }
     std::cout << flag << ' ';
-    //sleep(0.1); //0.1ms
+    // sleep(0.1); //0.1ms
     flag = canSend(data2, can_id, 8);
     if (flag == EXIT_FAILURE)
     {
-        //TRACE("Motor %d connect failed! \n", can_id);
+        // TRACE("Motor %d connect failed! \n", can_id);
         return EXIT_FAILURE;
     }
     std::cout << flag << ' ';
     // Sleep(100);
-    //TRACE("Motor %d has been connected! \n", can_id);
+    // TRACE("Motor %d has been connected! \n", can_id);
     return EXIT_SUCCESS;
 }
 
@@ -118,17 +118,17 @@ int Kvaser::motorEnable(long can_id)
     int flag = canSend(data, temp_id, 8);
     if (flag == EXIT_FAILURE)
     {
-        //TRACE("Motor %d enable failed! \n", can_id);
+        // TRACE("Motor %d enable failed! \n", can_id);
         return EXIT_FAILURE;
     }
-    //Sleep(100);
+    // Sleep(100);
     flag = canSend(data, temp_id, 8);
     if (flag == EXIT_FAILURE)
     {
-        //TRACE("Motor %d enable failed! \n", can_id);
+        // TRACE("Motor %d enable failed! \n", can_id);
         return EXIT_FAILURE;
     }
-    //TRACE("Motor %d has been enabled! \n", can_id);
+    // TRACE("Motor %d has been enabled! \n", can_id);
     return EXIT_SUCCESS;
 }
 
@@ -142,7 +142,7 @@ int Kvaser::motorDisable(long can_id)
     int flag = canSend(data, temp_id, 8);
     if (flag == EXIT_FAILURE)
     {
-        //TRACE("Motor %d disabled failed! \n", can_id);
+        // TRACE("Motor %d disabled failed! \n", can_id);
         return EXIT_FAILURE;
     }
     ////TRACE("Motor %d has been disabled! \n", can_id);
@@ -161,35 +161,41 @@ int Kvaser::modeChoose(long can_id, Mode mode)
     uint8_t data5[8] = {0x55, 0x4D, 0x00, 0x00, 0x05, 0x00, 0x00, 0x00}; // um=5
     long temp_id = can_id | (6 << 7);
     motorDisable(can_id);
-    //Sleep(100);
+    // Sleep(100);
     int flag = 0;
     switch (mode)
     {
-        case TORQUE_MODE:flag = canSend(data1, temp_id, 8);
-            //Sleep(100);
-            break;
-        case SPEED_MODE:flag = canSend(data2, temp_id, 8);
-            //Sleep(100);
-            break;
-        case MICRO_STEPPING_MODE:flag = canSend(data3, temp_id, 8);
-            //Sleep(100);
-            break;
-        case DUAL_FEEDBACK_POSITION_MODE:flag = canSend(data4, temp_id, 8);
-            //Sleep(100);
-            break;
-        case SINGLE_FEEDBACK_POSITION_MODE:flag = canSend(data5, temp_id, 8);
-            //Sleep(50 * 100);
-            break;
-        default: break;
+    case TORQUE_MODE:
+        flag = canSend(data1, temp_id, 8);
+        // Sleep(100);
+        break;
+    case SPEED_MODE:
+        flag = canSend(data2, temp_id, 8);
+        // Sleep(100);
+        break;
+    case MICRO_STEPPING_MODE:
+        flag = canSend(data3, temp_id, 8);
+        // Sleep(100);
+        break;
+    case DUAL_FEEDBACK_POSITION_MODE:
+        flag = canSend(data4, temp_id, 8);
+        // Sleep(100);
+        break;
+    case SINGLE_FEEDBACK_POSITION_MODE:
+        flag = canSend(data5, temp_id, 8);
+        // Sleep(50 * 100);
+        break;
+    default:
+        break;
     }
     if (flag == EXIT_FAILURE)
     {
-        //TRACE("Motor %d choose mode failed! \n", can_id);
+        // TRACE("Motor %d choose mode failed! \n", can_id);
         return EXIT_FAILURE;
     }
     motorEnable(can_id);
-    //Sleep(100); // need more time
-    //TRACE("Motor %d mode has been chosen! \n", can_id);
+    // Sleep(100); // need more time
+    // TRACE("Motor %d mode has been chosen! \n", can_id);
     return EXIT_SUCCESS;
 }
 
@@ -201,15 +207,15 @@ int Kvaser::speedMode(long can_id, int32_t speed)
     uint8_t data[8] = {0x4A, 0x56, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}; // JV;
     dataIntegrationInt(data, speed);
     long tempID = can_id | (6 << 7);
-    int flag = canSend(data, tempID, 8);//jv
+    int flag = canSend(data, tempID, 8); // jv
     if (flag == EXIT_FAILURE)
     {
-        //TRACE("Motor %d start speed mode failed! \n", can_id);
+        // TRACE("Motor %d start speed mode failed! \n", can_id);
         return EXIT_FAILURE;
     }
-    //Sleep(100);
+    // Sleep(100);
     beginMovement(can_id);
-    //TRACE("Motor %d start speed mode! \n", can_id);
+    // TRACE("Motor %d start speed mode! \n", can_id);
     return EXIT_SUCCESS;
 }
 
@@ -220,16 +226,16 @@ int Kvaser::positionMode(long can_id, int32_t position, int32_t speed)
 {
     uint8_t data1[8] = {0x53, 0x50, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}; // sp
     uint8_t data2[8] = {0x50, 0x41, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}; // pa
-    dataIntegrationInt(data1, speed);// sp=SpeedValue
-    dataIntegrationInt(data2, position);// pa=PosValue
+    dataIntegrationInt(data1, speed);                                    // sp=SpeedValue
+    dataIntegrationInt(data2, position);                                 // pa=PosValue
     long tempID = can_id | (6 << 7);
     canSend(data1, tempID, 8);
-    //Sleep(100);
+    // Sleep(100);
     canSend(data2, tempID, 8);
-    //Sleep(1000);
-    //Sleep(100);
+    // Sleep(1000);
+    // Sleep(100);
     beginMovement(can_id);
-    //TRACE("Motor %d start speed mode! \n", can_id);
+    // TRACE("Motor %d start speed mode! \n", can_id);
     return EXIT_SUCCESS;
 }
 
@@ -239,16 +245,16 @@ int Kvaser::positionMode(long can_id, int32_t position, int32_t speed)
 int Kvaser::torqueMode(long can_id, float torque)
 {
     uint8_t data[8] = {0x54, 0x43, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}; // TC;
-    //uint temp_id=can_id;uint8_t TempPos[8];uint32_t tempRevDlc; int DataTemp=0;
+    // uint temp_id=can_id;uint8_t TempPos[8];uint32_t tempRevDlc; int DataTemp=0;
     dataIntegrationFloat(data, torque);
     long temp_id = can_id | (6 << 7);
     int flag = canSend(data, temp_id, 8);
     if (flag == EXIT_FAILURE)
     {
-        //TRACE("Motor %d start torque failed! \n", can_id);
+        // TRACE("Motor %d start torque failed! \n", can_id);
         return EXIT_FAILURE;
     }
-    //GetInfAndRead(data,TempPos,channelNum,temp_id,8,&tempRevDlc);
+    // GetInfAndRead(data,TempPos,channelNum,temp_id,8,&tempRevDlc);
     return EXIT_SUCCESS;
 }
 
@@ -279,10 +285,10 @@ int Kvaser::beginMovement(long can_id)
     int flag = canSend(data, temp_id, 4);
     if (flag == EXIT_FAILURE)
     {
-        //TRACE("Motor %d begin move! failed! \n", can_id);
+        // TRACE("Motor %d begin move! failed! \n", can_id);
         return EXIT_FAILURE;
     }
-    //TRACE("Motor %d begin move!", can_id);
+    // TRACE("Motor %d begin move!", can_id);
     return EXIT_SUCCESS;
 }
 
@@ -298,12 +304,13 @@ float Kvaser::getPosition(long can_id, uint16_t encoder_count, uint16_t reductio
     int data_temp = 0;
     canFlushReceiveQueue(handle);
     do
-    { getInfAndRead(data, temp_Pos, temp_id, 4, &temp_rev_dlc); }
-    while (!((temp_Pos[0] == 0x50) && (temp_Pos[1] == 0x58) && (temp_Pos[3] != 0x40)));
+    {
+        getInfAndRead(data, temp_Pos, temp_id, 4, &temp_rev_dlc);
+    } while (!((temp_Pos[0] == 0x50) && (temp_Pos[1] == 0x58) && (temp_Pos[3] != 0x40)));
     data_temp =
-            (temp_Pos[7] & 0xff) << 24 | (temp_Pos[6] & 0xff) << 16 | (temp_Pos[5] & 0xff) << 8 | temp_Pos[4] & 0xff;
+        (temp_Pos[7] & 0xff) << 24 | (temp_Pos[6] & 0xff) << 16 | (temp_Pos[5] & 0xff) << 8 | temp_Pos[4] & 0xff;
     // 弧度值 = 2*PI*计数值（编码器格数/S） / 分辨率 / 减速比 / elmo放大倍数(4)
-    return (float) (2.0 * PI * data_temp / 4.0 / encoder_count / reduction_ratio);
+    return (float)(2.0 * PI * data_temp / 4.0 / encoder_count / reduction_ratio);
 }
 
 /*
@@ -324,7 +331,7 @@ float Kvaser::getVelocity(long can_id, uint16_t encoder_count, uint16_t reductio
                     (temp_vel[6] & 0xff) << 16 | (temp_vel[5] & 0xff) << 8 | temp_vel[4] & 0xff;
     }
     // 角速度 = 2*PI*计数速度 / 分辨率 / 减速比 / elmo放大倍数(4)
-    return (float) (2.0 * PI * data_temp / 4.0 / encoder_count / reduction_ratio);
+    return (float)(2.0 * PI * data_temp / 4.0 / encoder_count / reduction_ratio);
 }
 
 /*
@@ -336,7 +343,8 @@ int Kvaser::getInfAndRead(uint8_t *send_msg, uint8_t *read_msg, long can_id, uns
     unsigned long tempTime;
     unsigned int flag;
     canWrite(handle, can_id | (6 << 7), send_msg, send_dlc, 0);
-    while (canReadSpecific(handle, can_id | (5 << 7), read_msg, read_dlc, &flag, &tempTime) != canOK);
+    while (canReadSpecific(handle, can_id | (5 << 7), read_msg, read_dlc, &flag, &tempTime) != canOK)
+        ;
     return EXIT_SUCCESS;
 }
 
@@ -372,13 +380,10 @@ void Kvaser::dataIntegrationInt(uint8_t *temp, int32_t temp_value)
  */
 void Kvaser::dataIntegrationFloat(uint8_t *temp, float temp_value)
 {
-    int data = *(int *) &temp_value;
+    int data = *(int *)&temp_value;
     temp[7] = (data >> 24);
     temp[6] = ((data << 8) >> 24);
     temp[5] = ((data << 16) >> 24);
     temp[4] = ((data << 24) >> 24);
     temp[3] |= 1 << 7;
 }
-
-
-

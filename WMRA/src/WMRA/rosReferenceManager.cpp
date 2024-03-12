@@ -13,14 +13,22 @@ RosReferenceManager::RosReferenceManager(ros::NodeHandle &n)
     path.header.stamp = currentTime;
     path.header.frame_id = "world";
 
-    std::cout << "[------] RosReferenceManager init success" << std::endl;
+    // path_d
+    this->pathPublisher_d = n.advertise<nav_msgs::Path>("/WMRA/trajectory_d", 1, true);
+    ros::Time currentTime_d = ros::Time::now();
+    path_d.header.stamp = currentTime_d;
+    path_d.header.frame_id = "world";
+
+    std::cout << "[------] RosReference Manager init success" << std::endl;
 }
 RosReferenceManager::~RosReferenceManager()
 {
 }
 
-void RosReferenceManager::run(double &v, double &w, double &x, double &y, double &theta)
+void RosReferenceManager::pubBaseData(double &v, double &w, double &x, double &y, double &theta,
+                                      double &x_d, double &y_d, double &theta_d)
 {
+    // std::cout << "[------] pubBaseData" << std::endl;
     ros::Time currentTime = ros::Time::now();
     // odomTrans
     geometry_msgs::Quaternion odomQuaternion = tf::createQuaternionMsgFromYaw(theta);
@@ -55,4 +63,15 @@ void RosReferenceManager::run(double &v, double &w, double &x, double &y, double
     this->poseStamped.pose.orientation = odomQuaternion;
     this->path.poses.push_back(this->poseStamped);
     this->pathPublisher.publish(this->path);
+
+    // path_d
+    geometry_msgs::Quaternion odomQuaternion_d = tf::createQuaternionMsgFromYaw(theta_d);
+    this->poseStamped_d.header.stamp = currentTime;
+    this->poseStamped_d.header.frame_id = "world";
+    this->poseStamped_d.pose.position.x = x_d;
+    this->poseStamped_d.pose.position.y = y_d;
+    this->poseStamped_d.pose.position.z = 0.0;
+    this->poseStamped_d.pose.orientation = odomQuaternion_d;
+    this->path_d.poses.push_back(this->poseStamped_d);
+    this->pathPublisher_d.publish(this->path_d);
 }

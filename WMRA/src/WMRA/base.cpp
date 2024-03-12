@@ -52,12 +52,12 @@ WheelChair::~WheelChair()
 
 void WheelChair::setCommand(double Vd, double Wd)
 {
-    if (Vd == this->Vd && Wd == this->Wd)
-    {
-        if (Vd != 0 || Wd != 0)
-            this->updateFlag = true;
-        return;
-    }
+    // if (Vd == this->Vd && Wd == this->Wd)
+    // {
+    //     if (Vd != 0 || Wd != 0)
+    //         this->updateFlag = true;
+    //     return;
+    // }
 
     this->updateFlag = true;
 
@@ -77,20 +77,20 @@ void WheelChair::setCommand(double Vd, double Wd)
 
     if (this->rightWheelVd < -0.3 * 32 * 4096 / 2 / PI / wheelRadius)
         this->rightWheelVd = -0.3 * 32 * 4096 / 2 / PI / wheelRadius;
-    // std::cout << "leftWheelVd:" << this->leftWheelVd << "  rightWheelVd:" << this->rightWheelVd << std::endl;
+    std::cout << "leftWheelVd:" << this->leftWheelVd << "  rightWheelVd:" << this->rightWheelVd << std::endl;
 
     // 发送
     this->kvaserInterface->speedMode(1, this->leftWheelVd);
     this->kvaserInterface->speedMode(2, this->rightWheelVd);
 
-    this->kvaserInterface->beginMovement(1);
-    this->kvaserInterface->beginMovement(2);
+    // this->kvaserInterface->beginMovement(1);
+    // this->kvaserInterface->beginMovement(2);
 }
 
 void WheelChair::updateData()
 {
-    if (!this->updateFlag)
-        return;
+    // if (!this->updateFlag)
+    //     return;
 
     // 读取轮子线速度
     this->rightWheelV = this->kvaserInterface->getVelocity(1, 1024, 32) * this->wheelRadius;
@@ -117,4 +117,12 @@ void WheelChair::run(double Vd, double Wd)
 {
     this->setCommand(Vd, Wd);
     this->updateData();
+}
+void WheelChair::getData(double &v, double &w, double &x, double &y, double &theta)
+{
+    v = this->V;
+    w = this->W;
+    x = this->x;
+    y = this->y;
+    theta = this->theta;
 }
