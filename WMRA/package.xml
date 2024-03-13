@@ -58,6 +58,8 @@
   <build_export_depend>std_msgs</build_export_depend>
   <depend>tf</depend>
   <depend>tf_conversions</depend>
+  <build_depend>message_generation</build_depend>
+  <exec_depend>message_runtime</exec_depend>
   <exec_depend>roscpp</exec_depend>
   <exec_depend>rospy</exec_depend>
   <exec_depend>std_msgs</exec_depend>

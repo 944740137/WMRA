@@ -50,11 +50,11 @@ set(EIGEN_PATH /usr/include/eigen3)
 ##   * add every package in MSG_DEP_SET to generate_messages(DEPENDENCIES ...)
 
 ## Generate messages in the 'msg' folder
-# add_message_files(
-#   FILES
-#   Message1.msg
-#   Message2.msg
-# )
+#消息生成器
+add_message_files(FILES
+  paramForDebug.msg
+)
+
 
 ## Generate services in the 'srv' folder
 # add_service_files(
@@ -71,10 +71,8 @@ set(EIGEN_PATH /usr/include/eigen3)
 # )
 
 ## Generate added messages and services with any dependencies listed here
-# generate_messages(
-#   DEPENDENCIES
-#   std_msgs
-# )
+#调用消息生成
+generate_messages()
 
 ################################################
 ## Declare ROS dynamic reconfigure parameters ##
@@ -164,6 +162,7 @@ add_executable(armTest
 target_link_libraries(armTest 
   libZ1_SDK_x86_64.so 
 )
+
 
 #############
 ## Install ##

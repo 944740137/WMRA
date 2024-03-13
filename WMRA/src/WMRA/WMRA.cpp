@@ -8,55 +8,49 @@
 #include <chrono>
 
 #include <thread>
+
+#include <fstream>
 using std::chrono::high_resolution_clock;
 using std::chrono::milliseconds;
+std::ofstream myfile;
 
 void armRun();
 void baseRun();
 
 // 开环控制
-void Velcontroller1(double x, double y, double theta, double xd, double yd, double vxd, double vyd, double &uv, double &uw)
+void Velcontroller1(double interval, double x, double y, double theta,
+                    double xd, double yd, double &vxd, double &vyd, double &uv, double &uw)
 {
+    static double last_theta_d = 0;
     double Vd = sqrt(vxd * vxd + vyd * vyd);
-    double Wd = atan2(vyd, vxd);
+    double theta_d = atan2(vyd, vxd);
+
+    if (theta_d < 0)
+        theta_d += 2 * M_PI;
+    double delta_theta = fmod((theta_d - last_theta_d + 3 * M_PI), (2 * M_PI)) - M_PI;
+    double Wd = delta_theta / interval;
+    last_theta_d = theta_d;
+
     uv = Vd;
     uw = Wd;
-}
-// 控制1
-void Velcontroller2(double x, double y, double theta, double xd, double yd, double theta_d, double vxd, double vyd, double &uv, double &uw)
-{
-    double k1 = 4;
-    double k2 = 500;
-    double k3 = 3;
-
-    double x_e = cos(theta) * (xd - x) + sin(theta) * (yd - y);
-    double y_e = -sin(theta) * (xd - x) + cos(theta) * (yd - y);
-    double theta_e = theta_d - theta;
-
-    double Vd = sqrt(vxd * vxd + vyd * vyd);
-    double Wd = atan2(vyd, vxd);
-    uv = Vd * cos(theta_e) + k1 * x_e;
-    uw = Wd + k2 * Vd * y_e + k3 * sin(theta_e);
+    std::cout << "theta_d: " << theta_d << std::endl;
 }
 
-void velPlan1(double &time, double &xd, double &yd, double &vxd, double &vyd, double &theta_d)
+void velPlan1(double &time, double &xd, double &yd, double &vxd, double &vyd)
 {
-    double para = PI / 1024;
-    xd = 1 - cos(para * time);
-    yd = sin(para * time);
-    theta_d = atan2(yd, xd);
-    vxd = para * sin(para * time);
-    vyd = para * cos(para * time);
-}
-
-void velPlan1(double &time, double &xd, double &yd, double &vxd, double &vyd, double &theta_d)
-{
-    double para = 0.01;
+    double para = 0.1;
     xd = para * time;
     yd = 0;
-    theta_d = 0;
     vxd = para;
     vyd = 0;
+}
+void velPlan2(double &time, double &xd, double &yd, double &vxd, double &vyd)
+{
+    double para = PI / 16;
+    xd = sin(para * time);
+    yd = -1 + cos(para * time);
+    vxd = para * cos(para * time);
+    vyd = -para * sin(para * time);
 }
 
 Manipulator *manipulator;
@@ -71,6 +65,9 @@ int main(int argc, char *argv[])
     // ros
     ros::init(argc, argv, "WMRA");
     ros::NodeHandle n;
+
+    myfile.open("/home/wd/workSpace/WMRA/WMRA_ROS/recordWMRA.txt");
+    myfile << "WMRA" << std::endl;
 
     // case
     rosReferenceManage = new RosReferenceManager(n);
@@ -130,34 +127,50 @@ void baseRun()
     wheelChair = new WheelChair();
 
     // vary
-    double Vd, Wd, xd, yd, theta_d, vxd, vyd, uv, uw = 0; // plan and control
-    double V, W, x, y, theta = 0;                         // reality
+    double Vd, Wd, xd, yd, theta_d, vxd, vyd, vrd, vld, uv, uw = 0; // plan and control
+    double V, W, x, y, theta, vr, vl = 0;                           // reality
+    double xd_cal, yd_cal, v_sim, w_sim, vx_sim, vy_sim, theta_sim, theta_sim_d = 0;
+    double theta_old;
 
     // time
-    double time = 0; // 1000microSec
-    int cycle = 100; // ms
+    double time = 0.1;     // all time
+    int cycle = 100;       // 期望周期
+    double interval = 0.1; // 实际周期
+
     while (ros::ok())
     {
+        myfile << "time: " << time << " interval: " << interval << "_\n";
+        std::cout << "time: " << time << " interval: " << interval << "_\n";
         high_resolution_clock::time_point beginTime = high_resolution_clock::now();
 
-        // get
-        wheelChair->getData(V, W, x, y, theta);
-
         // 轨迹
-        velPlan1(time, xd, yd, vxd, vyd, theta_d);
+        // velPlan1(time, xd, yd, theta_d);
+        velPlan2(time, xd, yd, vxd, vyd);
 
         // calBaseU
-        // Velcontroller1(x, y, theta, xd, yd, vxd, vyd, uv, uw);
-        Velcontroller2(x, y, theta, xd, yd, theta_d, vxd, vyd, uv, uw);
-        std::cout << "uv: " << uv << "uw: " << uw << std::endl;
+        Velcontroller1(interval, x, y, theta, xd, yd, vxd, vyd, uv, uw);
         // run
         // uv = 0;
-        // uw = 0.5;
-        wheelChair->run(uv, uw);
+        // uw = 0.0;
+        wheelChair->run(uv, uw, time);
 
-        // pub
-        rosReferenceManage->pubBaseData(V, W, x, y, theta, xd, yd, theta_d);
-        // sleep
+        wheelChair->getData(V, W, x, y, theta, vr, vl, vrd, vld);
+        myfile << " x:" << x << " y:" << y << " theta: " << theta << std::endl;
+        myfile << " v:" << V << " w:" << W << std::endl;
+        myfile << "实际左轮: " << wheelChair->leftWheelV << "  实际右轮: " << wheelChair->rightWheelV << std::endl;
+        myfile << "uv: " << uv << " uw: " << uw << std::endl;
+        myfile << "期望左轮: " << vld << "  期望右轮: " << vrd << std::endl;
+        // pub des
+        v_sim = sqrt(vxd * vxd + vyd * vyd);
+        theta_sim_d = atan2(vyd, vxd);
+        w_sim = (theta_sim_d - theta_old) / interval;
+        theta_old = theta_sim_d;
+        theta_sim += w_sim * interval;
+        vx_sim = v_sim * cos(theta_sim);
+        vy_sim = v_sim * sin(theta_sim);
+        xd_cal += vx_sim * interval;
+        yd_cal += vy_sim * interval;
+        rosReferenceManage->pubBaseData(x, y, theta, xd_cal, yd_cal, theta_d, V, W, vr, vl, uv, uw, vrd, vld);
 
         high_resolution_clock::time_point comEndTime = high_resolution_clock::now();
         auto comTimeInterval = std::chrono::duration_cast<std::chrono::microseconds>(comEndTime - beginTime);
@@ -171,8 +184,11 @@ void baseRun()
         high_resolution_clock::time_point endTime = high_resolution_clock::now();
         auto allTimeInterval = std::chrono::duration_cast<std::chrono::microseconds>(endTime - beginTime);
         // std::cout << "baseRun Running Time：" << allTimeInterval.count() << "微秒" << std::endl;
-        time = time + allTimeInterval.count() / 1000.0 / 1000.0;
-        // std::cout << "baseRun Running Time：" << time << " s" << std::endl;
+        interval = allTimeInterval.count() / 1000.0 / 1000.0;
+        time = time + interval;
+        // std::cout << "baseRun Running interval" << interval << " s" << std::endl;
+        myfile << "----"
+               << "_\n";
     }
 
     delete wheelChair;

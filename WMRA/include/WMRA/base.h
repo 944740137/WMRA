@@ -3,7 +3,7 @@
 
 #include "kvaser/kvaser.h"
 
-const double cycle = 2; // ms
+// const double cycle = 2; // ms
 
 class WheelChair
 {
@@ -11,10 +11,11 @@ public:
     WheelChair();
     ~WheelChair();
 
-    void run(double Vd, double Wd);
+    void run(double Vd, double Wd, double nowtime);
     void setCommand(double Vd, double Wd);
-    void updateData();
-    void getData(double &v, double &w, double &x, double &y, double &theta);
+    void updateData(double timeInterval);
+    void getData(double &v, double &w, double &x, double &y, double &theta,
+                 double &vr, double &vl, double &vrd, double &vld);
     double getV() { return V; }
     double getW() { return W; }
     double getX() { return x; }
@@ -23,7 +24,7 @@ public:
     double getRightWheelV() { return rightWheelV; }
     double getLeftWheelV() { return leftWheelV; }
 
-private:
+public:
     Kvaser *kvaserInterface;
     bool updateFlag = false;
 
@@ -47,6 +48,11 @@ private:
     double leftWheelVd;
     double rightWheelV;
     double leftWheelV;
+
+    double leftWheelV_count_d;
+    double rightWheelV_count_d;
+    double leftWheelV_count;
+    double rightWheelV_count;
 };
 
 #endif //_MOBILEBASW_H_

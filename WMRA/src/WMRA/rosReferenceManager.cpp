@@ -19,14 +19,19 @@ RosReferenceManager::RosReferenceManager(ros::NodeHandle &n)
     path_d.header.stamp = currentTime_d;
     path_d.header.frame_id = "world";
 
+    // 发布者对象
+    velPublisher = n.advertise<WMRA::paramForDebug>("paramForDebug", 30);
+    
     std::cout << "[------] RosReference Manager init success" << std::endl;
 }
 RosReferenceManager::~RosReferenceManager()
 {
 }
 
-void RosReferenceManager::pubBaseData(double &v, double &w, double &x, double &y, double &theta,
-                                      double &x_d, double &y_d, double &theta_d)
+void RosReferenceManager::pubBaseData(double &x, double &y, double &theta,
+                                      double &x_d, double &y_d, double &theta_d,
+                                      double &v, double &w, double &vr, double &vl,
+                                      double &uv, double &uw, double &vrd, double &vld)
 {
     // std::cout << "[------] pubBaseData" << std::endl;
     ros::Time currentTime = ros::Time::now();
@@ -74,4 +79,14 @@ void RosReferenceManager::pubBaseData(double &v, double &w, double &x, double &y
     this->poseStamped_d.pose.orientation = odomQuaternion_d;
     this->path_d.poses.push_back(this->poseStamped_d);
     this->pathPublisher_d.publish(this->path_d);
+
+    this->velparam.uv = uv;
+    this->velparam.uw = uw;
+    this->velparam.v = v;
+    this->velparam.w = w;
+    this->velparam.vr = vr;
+    this->velparam.vl = vl;
+    this->velparam.vrd = vrd;
+    this->velparam.vld = vld;
+    this->velPublisher.publish(this->velparam);
 }
