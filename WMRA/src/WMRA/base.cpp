@@ -4,6 +4,7 @@
 #include "math.h"
 #include <unistd.h>
 #include <iostream>
+
 extern std::ofstream myfile;
 
 WheelChair::WheelChair()
@@ -52,28 +53,28 @@ void WheelChair::setCommand(double Vd, double Wd)
 
     this->leftWheelVd = (2 * this->Vd - this->twoWheelDis * this->Wd) / 2.0;
     this->leftWheelV_count_d = this->leftWheelVd * 32 * 4096 / (2 * PI) / this->wheelRadius;
-    if (this->leftWheelV_count_d > 0.3 * 32 * 4096 / 2 / PI / wheelRadius)
+    if (this->leftWheelV_count_d > 0.4 * 32 * 4096 / 2 / PI / wheelRadius)
     {
         std::cout << "[------] leftWheelVd limit!!!" << std::endl;
-        this->leftWheelV_count_d = 0.3 * 32 * 4096 / 2 / PI / wheelRadius;
+        this->leftWheelV_count_d = 0.4 * 32 * 4096 / 2 / PI / wheelRadius;
     }
-    if (this->leftWheelV_count_d < -0.3 * 32 * 4096 / 2 / PI / wheelRadius)
+    if (this->leftWheelV_count_d < -0.4 * 32 * 4096 / 2 / PI / wheelRadius)
     {
         std::cout << "[------] leftWheelVd limit!!!" << std::endl;
-        this->leftWheelV_count_d = -0.3 * 32 * 4096 / 2 / PI / wheelRadius;
+        this->leftWheelV_count_d = -0.4 * 32 * 4096 / 2 / PI / wheelRadius;
     }
 
     this->rightWheelVd = (2 * this->Vd + this->twoWheelDis * this->Wd) / 2.0;
     this->rightWheelV_count_d = this->rightWheelVd * 32 * 4096 / (2 * PI) / this->wheelRadius;
-    if (rightWheelV_count_d > 0.3 * 32 * 4096 / 2 / PI / wheelRadius)
+    if (rightWheelV_count_d > 0.4 * 32 * 4096 / 2 / PI / wheelRadius)
     {
         std::cout << "[------] rightWheelVd limit!!!" << std::endl;
-        rightWheelV_count_d = 0.3 * 32 * 4096 / 2 / PI / wheelRadius;
+        rightWheelV_count_d = 0.4 * 32 * 4096 / 2 / PI / wheelRadius;
     }
-    if (rightWheelV_count_d < -0.3 * 32 * 4096 / 2 / PI / wheelRadius)
+    if (rightWheelV_count_d < -0.4 * 32 * 4096 / 2 / PI / wheelRadius)
     {
         std::cout << "[------] rightWheelVd limit!!!" << std::endl;
-        rightWheelV_count_d = -0.3 * 32 * 4096 / 2 / PI / wheelRadius;
+        rightWheelV_count_d = -0.4 * 32 * 4096 / 2 / PI / wheelRadius;
     }
 
     // 发送

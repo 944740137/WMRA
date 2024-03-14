@@ -54,6 +54,21 @@ void velPlan2(double &time, double &xd, double &yd, double &theta_d, double &vxd
     vyd = -para * sin(para * time);
     theta_d = atan2(vyd, vxd);
 }
+void velPlan3(double &time, double &xd, double &yd, double &theta_d, double &vxd, double &vyd)
+{
+    double a = 0.4;
+    double vmax = 0.4;
+    vxd = 0;
+    if (time >= 0 && time <= 1)
+        vxd = a * time;
+    if (time >= 1 && time <= 2.5)
+        vxd = vmax;
+    if (time >= 2.5 && time <= 3.5)
+        vxd = vmax - a * (time - 2.5);
+    vyd = 0;
+    theta_d = atan2(vyd, vxd);
+    // std::cout << "vxd:" << vxd << "\n";
+}
 
 int main(int argc, char *argv[])
 {
@@ -99,22 +114,22 @@ void baseRun()
         high_resolution_clock::time_point beginTime = high_resolution_clock::now();
 
         // 轨迹
-        velPlan1(time, xd, yd, theta_d, vxd, vyd);
-        // velPlan2(time, xd, yd, theta_d, vxd, vyd);
+        // velPlan1(time, xd, yd, theta_d, vxd, vyd); // 一直走
+        // velPlan2(time, xd, yd, theta_d, vxd, vyd); // 圆弧
+        velPlan3(time, xd, yd, theta_d, vxd, vyd); // 走1米
         // calBaseU
         Velcontroller1(interval, x, y, theta, xd, yd, vxd, vyd, uv, uw);
 
         // run
-        // uv = 0;
+        // uv = 0.31;
         // uw = 0.0;
         // send and read
         wheelChair->run(uv, uw, time);
         simBase(interval, uv, uw, xd_sim, yd_sim, theta_sim);
-
         // update
         wheelChair->getData(v, w, x, y, theta, vr, vl, vrd, vld);
 
-        // ros pub
+        // ros pub record
         // rosReferenceManage->pubBaseData(x, y, theta, xd_sim, yd_sim, theta_sim, V, W, vr, vl, uv, uw, vrd, vld);// 仿真
         rosReferenceManage->pubBaseData(x, y, theta, xd, yd, theta_d, v, w, vr, vl, uv, uw, vrd, vld); // 期望
         record(time, x, y, theta, xd, yd, theta_d, v, w, vd, wd, vl, vr, vld, vrd);
@@ -133,23 +148,9 @@ void baseRun()
         interval = allTimeInterval.count() / 1000.0 / 1000.0;
         time = time + interval;
         // std::cout << "interval: " << interval << " s" << std::endl;
-        myfile << "----_\n";
+        // myfile << "----_\n";
     }
     delete wheelChair;
-}
-void record(double time,
-            double x, double y, double theta,
-            double xd, double yd, double thetad,
-            double v, double w, double vd, double wd,
-            double vl, double vr, double vld, double vrd)
-{
-    myfile << " time:" << time << "\n";
-    myfile << " x: " << x << " |y: " << y << " |theta: " << theta << "\n";
-    myfile << " xd: " << xd << " |yd: " << yd << " |thetad: " << thetad << "\n";
-    myfile << " v: " << v << " |w: " << w << "\n";
-    myfile << " vd: " << vd << " |wd: " << wd << "\n";
-    // myfile << " vl: " << vl << " |vr: " << vr << "\n";
-    // myfile << " vld: " << vld << " |wrd: " << vrd << "\n";
 }
 
 void armRun()
@@ -165,25 +166,39 @@ void armRun()
     double posPara = 0.4;
     double velPara = 1.5;
 
+    Eigen::Matrix<double, 6, 1> targetQ;
+    targetQ << 0.0, 1.5, -1, -0.54, 0, 0;
+    q0 = manipulator->getq();
+
     // time
     double time = 0;
+    double cycle = 0.002; // 2ms
 
     while (ros::ok())
     {
         high_resolution_clock::time_point beginTime = high_resolution_clock::now();
+        // update +=2ms
+        time = time + cycle; // 单位：秒
+        // get
+        q = manipulator->getq();
+        
+        // 轨迹
+        q_d[0] = q0[0] + posPara * (1 - cos(velPara * time));
+        q_d[1] = q0[1] + posPara * (1 - cos(velPara * time));
+        q_d[2] = q0[2] - posPara * (1 - cos(velPara * time));
+        q_d[3] = q0[3] - posPara * (1 - cos(velPara * time));
+        q_d[4] = q0[4] - posPara * (1 - cos(velPara * time));
+        q_d[5] = q0[5] - posPara * (1 - cos(velPara * time));
 
-        // // update +=2ms
-        // time = time + cycle / 1000.0; // 单位：秒
-        // // get
-        // q = manipulator->getq();
-        // // 轨迹
+        // arm.qd = (targetQ - initQ) / (duration * arm._ctrlComp->dt);
 
-        // // run
-        // manipulator->run(q_d, dq_d, tau_feedforward);
-        // // rosReferenceManager->pubArmData(V, W, x, y, theta); // pub
-        // // sleep
+        // run
+        manipulator->run(q_d, dq_d, tau_feedforward);
+
+        // rosReferenceManager->pubArmData(V, W, x, y, theta); // pub
+
+        // sleep
         usleep(2 * 1000);
-
         high_resolution_clock::time_point endTime = high_resolution_clock::now();
         auto timeInterval = std::chrono::duration_cast<std::chrono::microseconds>(endTime - beginTime);
         std::cout << "armRun Running Time：" << timeInterval.count() << "微秒" << std::endl;
@@ -191,6 +206,20 @@ void armRun()
     delete manipulator;
 }
 
+void record(double time,
+            double x, double y, double theta,
+            double xd, double yd, double thetad,
+            double v, double w, double vd, double wd,
+            double vl, double vr, double vld, double vrd)
+{
+    myfile << " time:" << time << "\n";
+    myfile << " x: " << x << " |y: " << y << " |theta: " << theta << "\n";
+    myfile << " xd: " << xd << " |yd: " << yd << " |thetad: " << thetad << "\n";
+    myfile << " v: " << v << " |w: " << w << "\n";
+    myfile << " vd: " << vd << " |wd: " << wd << "\n";
+    // myfile << " vl: " << vl << " |vr: " << vr << "\n";
+    // myfile << " vld: " << vld << " |wrd: " << vrd << "\n";
+}
 void simBase(double interval, double &vd, double &wd, double &x_sim, double &y_sim, double &theta_sim)
 {
     theta_sim += wd * interval;
@@ -208,7 +237,7 @@ void calDesiredVW(double interval, double &vxd, double &vyd, double &vd, double 
     if (theta_d < 0)
         theta_d += 2 * M_PI;
     double delta_theta = fmod((theta_d - last_theta_d + 3 * M_PI), (2 * M_PI)) - M_PI;
-    std::cout << "delta_theta: " << delta_theta << " delta_theta: " << delta_theta << "_\n";
+    // std::cout << "delta_theta: " << delta_theta << " delta_theta: " << delta_theta << "_\n";
 
     wd = delta_theta / interval; //
     last_theta_d = theta_d;
