@@ -1,5 +1,5 @@
 #include "WMRA/arm.h"
-
+#include <Eigen/Dense>
 Manipulator::Manipulator(bool hasGripper)
 {
     arm = new unitreeArm(hasGripper);

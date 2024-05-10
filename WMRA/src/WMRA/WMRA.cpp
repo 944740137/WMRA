@@ -73,6 +73,21 @@ void velPlan2(double &time, double &xd, double &yd, double &theta_d, double &vxd
     vyd = -para * sin(para * time);
     theta_d = atan2(vyd, vxd);
 }
+void velPlan3(double &time, double &xd, double &yd, double &theta_d, double &vxd, double &vyd)
+{
+    double a = 0.4;
+    double vmax = 0.4;
+    vxd = 0;
+    if (time >= 0 && time <= 1)
+        vxd = a * time;
+    if (time >= 1 && time <= 2.5)
+        vxd = vmax;
+    if (time >= 2.5 && time <= 3.5)
+        vxd = vmax - a * (time - 2.5);
+    vyd = 0;
+    theta_d = atan2(vyd, vxd);
+    // std::cout << "vxd:" << vxd << "\n";
+}
 
 int main(int argc, char *argv[])
 {
@@ -129,14 +144,17 @@ void baseRun()
 
         // Velcontroller1(interval, x, y, theta, xd, yd, vxd, vyd, uv, uw);
 
+        // run
+        // uv = 0.31;
+        // uw = 0.0;
+        // send and read
         // wheelChair->run(uv, uw, time);
         wheelChair->run(time);
         simBase(interval, uv, uw, xd_sim, yd_sim, theta_sim);
-
         // update
         wheelChair->getData(v, w, x, y, theta, vr, vl, vrd, vld);
 
-        // ros pub
+        // ros pub record
         // rosReferenceManage->pubBaseData(x, y, theta, xd_sim, yd_sim, theta_sim, V, W, vr, vl, uv, uw, vrd, vld);// 仿真
         rosReferenceManage->pubBaseData(x, y, theta, xd, yd, theta_d, v, w, vr, vl, uv, uw, vrd, vld); // 期望
         record(time, x, y, theta, xd, yd, theta_d, v, w, vd, wd, vl, vr, vld, vrd);
@@ -170,13 +188,22 @@ void armRun()
     double posPara = 0.4;
     double velPara = 1.5;
 
+    Eigen::Matrix<double, 6, 1> targetQ;
+    targetQ << 0.0, 1.5, -1, -0.54, 0, 0;
+    q0 = manipulator->getq();
+
     // time
     double time = 0;
+    double cycle = 0.002; // 2ms
 
     while (runFlag)
     {
-        // // update +=2ms
-        time = time + 0.002; // 单位：秒
+        high_resolution_clock::time_point beginTime = high_resolution_clock::now();
+        // update +=2ms
+        time = time + cycle; // 单位：秒
+        // get
+        q = manipulator->getq();
+
         // // get
         // q = manipulator->getq();
         // // 轨迹
