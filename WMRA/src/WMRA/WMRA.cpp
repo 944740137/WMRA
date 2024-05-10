@@ -138,17 +138,17 @@ void baseRun()
         high_resolution_clock::time_point beginTime = high_resolution_clock::now();
 
         // 轨迹
-        // velPlan1(time, xd, yd, theta_d, vxd, vyd); // 一直走
-        // velPlan2(time, xd, yd, theta_d, vxd, vyd); // 圆弧
-        velPlan3(time, xd, yd, theta_d, vxd, vyd); // 走1米
+        // velPlan1(time, xd, yd, theta_d, vxd, vyd);
+        // velPlan2(time, xd, yd, theta_d, vxd, vyd);
         // calBaseU
-        Velcontroller1(interval, x, y, theta, xd, yd, vxd, vyd, uv, uw);
+        // Velcontroller1(interval, x, y, theta, xd, yd, vxd, vyd, uv, uw);
 
         // run
         // uv = 0.31;
         // uw = 0.0;
         // send and read
-        wheelChair->run(uv, uw, time);
+        // wheelChair->run(uv, uw, time);
+        wheelChair->run();
         simBase(interval, uv, uw, xd_sim, yd_sim, theta_sim);
         // update
         wheelChair->getData(v, w, x, y, theta, vr, vl, vrd, vld);
@@ -215,20 +215,6 @@ void armRun()
         q_d[4] = q0[4] - posPara * (1 - cos(velPara * time));
         q_d[5] = q0[5] - posPara * (1 - cos(velPara * time));
 
-<<<<<<< HEAD
-        // arm.qd = (targetQ - initQ) / (duration * arm._ctrlComp->dt);
-
-        // run
-        manipulator->run(q_d, dq_d, tau_feedforward);
-
-        // rosReferenceManager->pubArmData(V, W, x, y, theta); // pub
-
-        // sleep
-        usleep(2 * 1000);
-        high_resolution_clock::time_point endTime = high_resolution_clock::now();
-        auto timeInterval = std::chrono::duration_cast<std::chrono::microseconds>(endTime - beginTime);
-        std::cout << "armRun Running Time：" << timeInterval.count() << "微秒" << std::endl;
-=======
         // // update +=2ms
         time = time + 0.002; // 单位：秒
         // // get
@@ -331,7 +317,6 @@ void KeyboardTask()
         }
         nowInput = 0;
         usleep(1000);
->>>>>>> ec30807110e4591191925a123bb48efd3163265c
     }
 }
 void record(double time,
@@ -380,10 +365,6 @@ void calDesiredVW(double interval, double &vxd, double &vyd, double &vd, double 
     if (theta_d < 0)
         theta_d += 2 * M_PI;
     double delta_theta = fmod((theta_d - last_theta_d + 3 * M_PI), (2 * M_PI)) - M_PI;
-<<<<<<< HEAD
-    // std::cout << "delta_theta: " << delta_theta << " delta_theta: " << delta_theta << "_\n";
-=======
->>>>>>> ec30807110e4591191925a123bb48efd3163265c
 
     wd = delta_theta / interval; //
     last_theta_d = theta_d;
