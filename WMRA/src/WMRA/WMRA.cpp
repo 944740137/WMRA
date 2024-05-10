@@ -6,17 +6,35 @@
 #include <chrono>
 #include <thread>
 #include <fstream>
+#include <fcntl.h>
 
 using std::chrono::high_resolution_clock;
 using std::chrono::milliseconds;
+
+bool runFlag = true;
 
 std::ofstream myfile;
 Manipulator *manipulator;
 WheelChair *wheelChair;
 RosReferenceManager *rosReferenceManage;
-
+enum Command
+{
+    stop = 0,
+    move = 1
+};
+enum DIM
+{
+    roll = 0,
+    pitch = 1,
+    yaw = 2,
+    x = 3,
+    y = 4,
+    z = 5
+};
 void armRun();
 void baseRun();
+void KeyboardTask();
+
 void calDesiredVW(double interval, double &vxd, double &vyd, double &vd, double &wd);
 void simBase(double interval, double &vd, double &wd,
              double &x_sim, double &y_sim, double &theta_sim);
@@ -86,12 +104,18 @@ int main(int argc, char *argv[])
     rosReferenceManage = new RosReferenceManager(n);
 
     // run
-    std::thread threadObj(baseRun);
-    armRun();
+    std::thread threadKeyArmRun(armRun);
+    std::thread threadBaseRun(baseRun);
+    threadKeyArmRun.detach();
+    threadBaseRun.detach();
 
+    KeyboardTask();
     // END
-    threadObj.join();
+
     std::cout << "[------] End Program" << std::endl;
+
+    delete wheelChair;
+    delete manipulator;
     return 0;
 }
 
@@ -109,7 +133,7 @@ void baseRun()
     double time = 0.1;     // all time
     int cycle = 100;       // 期望周期
     double interval = 0.1; // 实际周期
-    while (ros::ok())
+    while (runFlag)
     {
         high_resolution_clock::time_point beginTime = high_resolution_clock::now();
 
@@ -139,8 +163,10 @@ void baseRun()
         auto comTimeInterval = std::chrono::duration_cast<std::chrono::microseconds>(comEndTime - beginTime);
         // std::cout << "baseRun com Time：" << comTimeInterval.count() << "微秒" << std::endl;
         int sleepTime = cycle * 1000 - comTimeInterval.count();
+
         if (sleepTime < 0)
             sleepTime = 0;
+
         usleep(sleepTime);
         high_resolution_clock::time_point endTime = high_resolution_clock::now();
         auto allTimeInterval = std::chrono::duration_cast<std::chrono::microseconds>(endTime - beginTime);
@@ -150,7 +176,6 @@ void baseRun()
         // std::cout << "interval: " << interval << " s" << std::endl;
         // myfile << "----_\n";
     }
-    delete wheelChair;
 }
 
 void armRun()
@@ -174,7 +199,7 @@ void armRun()
     double time = 0;
     double cycle = 0.002; // 2ms
 
-    while (ros::ok())
+    while (runFlag)
     {
         high_resolution_clock::time_point beginTime = high_resolution_clock::now();
         // update +=2ms
@@ -190,6 +215,7 @@ void armRun()
         q_d[4] = q0[4] - posPara * (1 - cos(velPara * time));
         q_d[5] = q0[5] - posPara * (1 - cos(velPara * time));
 
+<<<<<<< HEAD
         // arm.qd = (targetQ - initQ) / (duration * arm._ctrlComp->dt);
 
         // run
@@ -202,8 +228,125 @@ void armRun()
         high_resolution_clock::time_point endTime = high_resolution_clock::now();
         auto timeInterval = std::chrono::duration_cast<std::chrono::microseconds>(endTime - beginTime);
         std::cout << "armRun Running Time：" << timeInterval.count() << "微秒" << std::endl;
+=======
+        // // update +=2ms
+        time = time + 0.002; // 单位：秒
+        // // get
+        // q = manipulator->getq();
+        // // 轨迹
+
+        // run
+        // manipulator->run(q_d, dq_d, tau_feedforward);
+        manipulator->run();
+        // rosReferenceManager->pubArmData(V, W, x, y, theta); // pub
+        // if (time > 3)
+        //     directions[5] = 0;
+        // sleep
+        usleep(2 * 1000);
     }
-    delete manipulator;
+}
+
+void KeyboardTask()
+{
+    std::cout << "[------] KeyboardTask" << std::endl;
+    sleep(2);
+
+    struct termios old_tio, new_tio;
+    tcgetattr(STDIN_FILENO, &old_tio);
+    // 设置终端为非规范模式，禁用回显和缓冲
+    new_tio = old_tio;
+    new_tio = old_tio;            //
+    new_tio.c_lflag &= (~ICANON); //
+    new_tio.c_cc[VTIME] = 0;
+    new_tio.c_cc[VMIN] = 1;
+
+    int attr = 1;
+    fcntl(STDIN_FILENO, F_SETFL, O_NONBLOCK);
+
+    char nowInput = 0;
+    char lastInput = 0;
+    bool isPress = false;
+    int count = 0;
+    while (runFlag)
+    {
+        tcsetattr(STDIN_FILENO, TCSANOW, &new_tio);
+        if (read(STDIN_FILENO, &nowInput, 1) == 1)
+        {
+            if (nowInput == 'q')
+            {
+                runFlag = false;
+                return;
+            }
+            switch (nowInput)
+            {
+            case 'w':
+                std::cout << " 按下w" << std::endl;
+                if (manipulator != nullptr)
+                    manipulator->setCommand(DIM::x, 1, Command::move);
+                break;
+            case 's':
+                std::cout << " 按下a" << std::endl;
+                if (manipulator != nullptr)
+                    manipulator->setCommand(DIM::x, -1, Command::move);
+                break;
+            case 'a':
+                std::cout << " 按下s" << std::endl;
+                if (manipulator != nullptr)
+                    manipulator->setCommand(DIM::y, 1, Command::move);
+                break;
+            case 'd':
+                std::cout << " 按下d" << std::endl;
+                if (manipulator != nullptr)
+                    manipulator->setCommand(DIM::y, -1, Command::move);
+                break;
+            case 'y':
+                std::cout << " 按下y" << std::endl;
+                if (manipulator != nullptr)
+                    manipulator->setCommand(DIM::z, 1, Command::move);
+                break;
+            case 'h':
+                std::cout << " 按下h" << std::endl;
+                if (manipulator != nullptr)
+                    manipulator->setCommand(DIM::z, -1, Command::move);
+                break;
+            default:
+                break;
+            }
+            isPress = true;
+            lastInput = nowInput;
+            count = 0;
+        }
+        else
+        {
+            count++;
+        }
+        tcsetattr(STDIN_FILENO, TCSANOW, &old_tio);
+        if (isPress && count >= 50)
+        {
+            std::cout << "松开" << std::endl;
+            if (manipulator != nullptr)
+                manipulator->setCommand(0, -1, Command::stop);
+            isPress = false;
+            count = 0;
+        }
+        nowInput = 0;
+        usleep(1000);
+>>>>>>> ec30807110e4591191925a123bb48efd3163265c
+    }
+}
+void record(double time,
+            double x, double y, double theta,
+            double xd, double yd, double thetad,
+            double v, double w, double vd, double wd,
+            double vl, double vr, double vld, double vrd)
+{
+    myfile << " time:" << time << "\n";
+    myfile << " x: " << x << " |y: " << y << " |theta: " << theta << "\n";
+    myfile << " xd: " << xd << " |yd: " << yd << " |thetad: " << thetad << "\n";
+    myfile << " v: " << v << " |w: " << w << "\n";
+    myfile << " vd: " << vd << " |wd: " << wd << "\n";
+    // myfile << " vl: " << vl << " |vr: " << vr << "\n";
+    // myfile << " vld: " << vld << " |wrd: " << vrd << "\n";
 }
 
 void record(double time,
@@ -237,7 +380,10 @@ void calDesiredVW(double interval, double &vxd, double &vyd, double &vd, double 
     if (theta_d < 0)
         theta_d += 2 * M_PI;
     double delta_theta = fmod((theta_d - last_theta_d + 3 * M_PI), (2 * M_PI)) - M_PI;
+<<<<<<< HEAD
     // std::cout << "delta_theta: " << delta_theta << " delta_theta: " << delta_theta << "_\n";
+=======
+>>>>>>> ec30807110e4591191925a123bb48efd3163265c
 
     wd = delta_theta / interval; //
     last_theta_d = theta_d;
