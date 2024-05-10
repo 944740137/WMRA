@@ -12,6 +12,7 @@ public:
     ~WheelChair();
 
     void run(double Vd, double Wd, double nowtime);
+    void run();
     void setCommand(double Vd, double Wd);
     void updateData(double timeInterval);
     void getData(double &v, double &w, double &x, double &y, double &theta,
@@ -27,6 +28,12 @@ public:
 public:
     Kvaser *kvaserInterface;
     bool updateFlag = false;
+    // 速度控制
+    double key_vd = 0.2;
+    double key_wd = 0.2;
+    double vd_direction = 1; // 1  -1 前后
+    double wd_direction = 1; // 1  -1 左右
+    double move = 0;      // 0  1
 
     // model
     const double twoWheelDis = 0.585;

@@ -80,7 +80,6 @@ void WheelChair::setCommand(double Vd, double Wd)
     // 发送
     this->kvaserInterface->speedMode(1, this->leftWheelV_count_d);
     this->kvaserInterface->speedMode(2, this->rightWheelV_count_d);
-
 }
 
 void WheelChair::updateData(double timeInterval)
@@ -114,6 +113,20 @@ void WheelChair::run(double Vd, double Wd, double nowtime)
     static double lastTime = 0;
     double timeInterval = nowtime - lastTime;
     this->setCommand(Vd, Wd);
+    this->updateData(timeInterval);
+    lastTime = nowtime;
+}
+void WheelChair::setCommand(double vd_direction, double wd_direction, double move)
+{
+    this->vd_direction = vd_direction;
+    this->wd_direction = wd_direction;
+    this->move = move;
+}
+void WheelChair::run()
+{
+    static double lastTime = 0;
+    double timeInterval = nowtime - lastTime;
+    this->setCommand(this->key_vd * this->vd_direction * this->move, this->key_wd * this->wd_direction * this->move);
     this->updateData(timeInterval);
     lastTime = nowtime;
 }

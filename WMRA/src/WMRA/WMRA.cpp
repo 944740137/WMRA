@@ -123,16 +123,17 @@ void baseRun()
         high_resolution_clock::time_point beginTime = high_resolution_clock::now();
 
         // 轨迹
-        velPlan1(time, xd, yd, theta_d, vxd, vyd);
+        // velPlan1(time, xd, yd, theta_d, vxd, vyd);
         // velPlan2(time, xd, yd, theta_d, vxd, vyd);
         // calBaseU
-        Velcontroller1(interval, x, y, theta, xd, yd, vxd, vyd, uv, uw);
+        // Velcontroller1(interval, x, y, theta, xd, yd, vxd, vyd, uv, uw);
 
         // run
         // uv = 0;
         // uw = 0.0;
         // send and read
-        wheelChair->run(uv, uw, time);
+        // wheelChair->run(uv, uw, time);
+        wheelChair->run();
         simBase(interval, uv, uw, xd_sim, yd_sim, theta_sim);
 
         // update
