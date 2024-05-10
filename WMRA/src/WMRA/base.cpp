@@ -34,6 +34,7 @@ WheelChair::~WheelChair()
     this->kvaserInterface->motorDisable(2);
     this->kvaserInterface->motorDisable(3);
     this->kvaserInterface->canRelease();
+    std::cout << "[------] WheelChair del success" << std::endl;
 }
 
 void WheelChair::setCommand(double Vd, double Wd)
