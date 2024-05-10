@@ -122,7 +122,7 @@ void WheelChair::setCommand(double vd_direction, double wd_direction, double mov
     this->wd_direction = wd_direction;
     this->move = move;
 }
-void WheelChair::run()
+void WheelChair::run(double nowtime)
 {
     static double lastTime = 0;
     double timeInterval = nowtime - lastTime;

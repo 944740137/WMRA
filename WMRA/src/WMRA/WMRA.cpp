@@ -31,6 +31,7 @@ enum DIM
     y = 4,
     z = 5
 };
+
 void armRun();
 void baseRun();
 void KeyboardTask();
@@ -125,15 +126,11 @@ void baseRun()
         // 轨迹
         // velPlan1(time, xd, yd, theta_d, vxd, vyd);
         // velPlan2(time, xd, yd, theta_d, vxd, vyd);
-        // calBaseU
+
         // Velcontroller1(interval, x, y, theta, xd, yd, vxd, vyd, uv, uw);
 
-        // run
-        // uv = 0;
-        // uw = 0.0;
-        // send and read
         // wheelChair->run(uv, uw, time);
-        wheelChair->run();
+        wheelChair->run(time);
         simBase(interval, uv, uw, xd_sim, yd_sim, theta_sim);
 
         // update
@@ -147,7 +144,6 @@ void baseRun()
         // Time
         high_resolution_clock::time_point comEndTime = high_resolution_clock::now();
         auto comTimeInterval = std::chrono::duration_cast<std::chrono::microseconds>(comEndTime - beginTime);
-        // std::cout << "baseRun com Time：" << comTimeInterval.count() << "微秒" << std::endl;
         int sleepTime = cycle * 1000 - comTimeInterval.count();
 
         if (sleepTime < 0)
@@ -156,11 +152,8 @@ void baseRun()
         usleep(sleepTime);
         high_resolution_clock::time_point endTime = high_resolution_clock::now();
         auto allTimeInterval = std::chrono::duration_cast<std::chrono::microseconds>(endTime - beginTime);
-        // std::cout << "baseRun all Time：" << allTimeInterval.count() << "微秒" << std::endl;
         interval = allTimeInterval.count() / 1000.0 / 1000.0;
         time = time + interval;
-        // std::cout << "interval: " << interval << " s" << std::endl;
-        // myfile << "----_\n";
     }
 }
 
@@ -182,8 +175,6 @@ void armRun()
 
     while (runFlag)
     {
-        high_resolution_clock::time_point beginTime = high_resolution_clock::now();
-
         // // update +=2ms
         time = time + 0.002; // 单位：秒
         // // get
@@ -234,35 +225,75 @@ void KeyboardTask()
             }
             switch (nowInput)
             {
+            case '8':
+                std::cout << " 按下8" << std::endl;
+                if (wheelChair != nullptr)
+                    wheelChair->setCommand(1, 0, 1);
+                break;
+            case '2':
+                std::cout << " 按下2" << std::endl;
+                if (wheelChair != nullptr)
+                    wheelChair->setCommand(-1, 0, 1);
+                break;
+            case '4':
+                std::cout << " 按下4" << std::endl;
+                if (wheelChair != nullptr)
+                    wheelChair->setCommand(0, 1, 1);
+                break;
+            case '6':
+                std::cout << " 按下6" << std::endl;
+                if (wheelChair != nullptr)
+                    wheelChair->setCommand(0, -1, 1);
+                break;
+                // arm xyz
             case 'w':
-                std::cout << " 按下w" << std::endl;
                 if (manipulator != nullptr)
                     manipulator->setCommand(DIM::x, 1, Command::move);
                 break;
             case 's':
-                std::cout << " 按下a" << std::endl;
                 if (manipulator != nullptr)
                     manipulator->setCommand(DIM::x, -1, Command::move);
                 break;
             case 'a':
-                std::cout << " 按下s" << std::endl;
                 if (manipulator != nullptr)
                     manipulator->setCommand(DIM::y, 1, Command::move);
                 break;
             case 'd':
-                std::cout << " 按下d" << std::endl;
                 if (manipulator != nullptr)
                     manipulator->setCommand(DIM::y, -1, Command::move);
                 break;
-            case 'y':
-                std::cout << " 按下y" << std::endl;
+            case 'r':
                 if (manipulator != nullptr)
                     manipulator->setCommand(DIM::z, 1, Command::move);
                 break;
-            case 'h':
-                std::cout << " 按下h" << std::endl;
+            case 'f':
                 if (manipulator != nullptr)
                     manipulator->setCommand(DIM::z, -1, Command::move);
+                break;
+                // arm rpy
+            case 'u':
+                if (manipulator != nullptr)
+                    manipulator->setCommand(DIM::roll, 1, Command::move);
+                break;
+            case 'j':
+                if (manipulator != nullptr)
+                    manipulator->setCommand(DIM::roll, -1, Command::move);
+                break;
+            case 'i':
+                if (manipulator != nullptr)
+                    manipulator->setCommand(DIM::pitch, 1, Command::move);
+                break;
+            case 'k':
+                if (manipulator != nullptr)
+                    manipulator->setCommand(DIM::pitch, -1, Command::move);
+                break;
+            case 'o':
+                if (manipulator != nullptr)
+                    manipulator->setCommand(DIM::yaw, 1, Command::move);
+                break;
+            case 'l':
+                if (manipulator != nullptr)
+                    manipulator->setCommand(DIM::yaw, -1, Command::move);
                 break;
             default:
                 break;
@@ -281,6 +312,8 @@ void KeyboardTask()
             std::cout << "松开" << std::endl;
             if (manipulator != nullptr)
                 manipulator->setCommand(0, -1, Command::stop);
+            if (manipulator != nullptr)
+                wheelChair->setCommand(0, 0, 0);
             isPress = false;
             count = 0;
         }
@@ -294,11 +327,11 @@ void record(double time,
             double v, double w, double vd, double wd,
             double vl, double vr, double vld, double vrd)
 {
-    myfile << " time:" << time << "\n";
-    myfile << " x: " << x << " |y: " << y << " |theta: " << theta << "\n";
-    myfile << " xd: " << xd << " |yd: " << yd << " |thetad: " << thetad << "\n";
-    myfile << " v: " << v << " |w: " << w << "\n";
-    myfile << " vd: " << vd << " |wd: " << wd << "\n";
+    // myfile << " time:" << time << "\n";
+    // myfile << " x: " << x << " |y: " << y << " |theta: " << theta << "\n";
+    // myfile << " xd: " << xd << " |yd: " << yd << " |thetad: " << thetad << "\n";
+    // myfile << " v: " << v << " |w: " << w << "\n";
+    // myfile << " vd: " << vd << " |wd: " << wd << "\n";
     // myfile << " vl: " << vl << " |vr: " << vr << "\n";
     // myfile << " vld: " << vld << " |wrd: " << vrd << "\n";
 }

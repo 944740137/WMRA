@@ -12,8 +12,9 @@ public:
     ~WheelChair();
 
     void run(double Vd, double Wd, double nowtime);
-    void run();
+    void run(double nowtime);
     void setCommand(double Vd, double Wd);
+    void setCommand(double vd_direction, double wd_direction, double move);
     void updateData(double timeInterval);
     void getData(double &v, double &w, double &x, double &y, double &theta,
                  double &vr, double &vl, double &vrd, double &vld);
@@ -33,7 +34,7 @@ public:
     double key_wd = 0.2;
     double vd_direction = 1; // 1  -1 前后
     double wd_direction = 1; // 1  -1 左右
-    double move = 0;      // 0  1
+    double move = 0;         // 0  1
 
     // model
     const double twoWheelDis = 0.585;
