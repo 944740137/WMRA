@@ -86,7 +86,6 @@ void velPlan3(double &time, double &xd, double &yd, double &theta_d, double &vxd
         vxd = vmax - a * (time - 2.5);
     vyd = 0;
     theta_d = atan2(vyd, vxd);
-    // std::cout << "vxd:" << vxd << "\n";
 }
 
 int main(int argc, char *argv[])
@@ -98,8 +97,8 @@ int main(int argc, char *argv[])
     ros::init(argc, argv, "WMRA");
     ros::NodeHandle n;
 
-    myfile.open("/home/wd/workSpace/WMRA/WMRA_ROS/recordWMRA.txt");
-    myfile << "WMRA" << std::endl;
+    // myfile.open("/home/wd/workSpace/WMRA/WMRA_ROS/recordWMRA.txt");
+    // myfile << "WMRA" << std::endl;
 
     // case
     rosReferenceManage = new RosReferenceManager(n);
@@ -145,12 +144,10 @@ void baseRun()
         // Velcontroller1(interval, x, y, theta, xd, yd, vxd, vyd, uv, uw);
 
         // run
-        // uv = 0.31;
-        // uw = 0.0;
-        // send and read
         // wheelChair->run(uv, uw, time);
         wheelChair->run(time);
-        simBase(interval, uv, uw, xd_sim, yd_sim, theta_sim);
+        // simBase(interval, uv, uw, xd_sim, yd_sim, theta_sim);
+
         // update
         wheelChair->getData(v, w, x, y, theta, vr, vl, vrd, vld);
 
@@ -201,20 +198,14 @@ void armRun()
         high_resolution_clock::time_point beginTime = high_resolution_clock::now();
         // update +=2ms
         time = time + cycle; // 单位：秒
-        // get
-        q = manipulator->getq();
 
-        // // get
-        // q = manipulator->getq();
         // // 轨迹
 
         // run
         // manipulator->run(q_d, dq_d, tau_feedforward);
         manipulator->run();
         // rosReferenceManager->pubArmData(V, W, x, y, theta); // pub
-        // if (time > 3)
-        //     directions[5] = 0;
-        // sleep
+
         usleep(2 * 1000);
     }
 }
@@ -253,22 +244,18 @@ void KeyboardTask()
             switch (nowInput)
             {
             case '8':
-                std::cout << " 按下8" << std::endl;
                 if (wheelChair != nullptr)
                     wheelChair->setCommand(1, 0, 1);
                 break;
             case '2':
-                std::cout << " 按下2" << std::endl;
                 if (wheelChair != nullptr)
                     wheelChair->setCommand(-1, 0, 1);
                 break;
             case '4':
-                std::cout << " 按下4" << std::endl;
                 if (wheelChair != nullptr)
                     wheelChair->setCommand(0, 1, 1);
                 break;
             case '6':
-                std::cout << " 按下6" << std::endl;
                 if (wheelChair != nullptr)
                     wheelChair->setCommand(0, -1, 1);
                 break;
@@ -339,7 +326,7 @@ void KeyboardTask()
             std::cout << "松开" << std::endl;
             if (manipulator != nullptr)
                 manipulator->setCommand(0, -1, Command::stop);
-            if (manipulator != nullptr)
+            if (wheelChair != nullptr)
                 wheelChair->setCommand(0, 0, 0);
             isPress = false;
             count = 0;
